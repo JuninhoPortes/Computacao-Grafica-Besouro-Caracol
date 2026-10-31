@@ -1,83 +1,84 @@
 
-import pygame
+import math
+from pathlib import Path
+
+import numpy as np
 
 from OpenGL.GL import (
     GL_COLOR_BUFFER_BIT,
     GL_DEPTH_BUFFER_BIT,
     GL_DEPTH_TEST,
-    GL_RENDERER,
-    GL_SHADING_LANGUAGE_VERSION,
-    GL_VENDOR,
-    GL_VERSION,
     glClear,
     glClearColor,
     glEnable,
-    glGetString,
+    glViewport,
 )
 
+from framework.core.base import Base
+from framework.core.shader_program import ShaderProgram
+from framework.core_ext.camera import Camera
+from framework.core_ext.mesh import Mesh
+from framework.geometry.box import create_box_geometry
 
-def informacao_opengl(parametro):
-    valor = glGetString(parametro)
-    return valor.decode("utf-8", errors="replace") if valor else "Indisponível"
 
+class BesouroCaracolApp(Base):
+    """Aplicacao principal de Computacao Grafica."""
 
-def main():
-    pygame.init()
-
-    try:
-        # Solicita um contexto OpenGL moderno (versão 3.3).
-        pygame.display.gl_set_attribute(
-            pygame.GL_CONTEXT_MAJOR_VERSION, 3
-        )
-        pygame.display.gl_set_attribute(
-            pygame.GL_CONTEXT_MINOR_VERSION, 3
-        )
-        pygame.display.gl_set_attribute(
-            pygame.GL_CONTEXT_PROFILE_MASK,
-            pygame.GL_CONTEXT_PROFILE_CORE,
-        )
-
-        # Cria a janela com suporte ao OpenGL.
-        pygame.display.set_mode(
-            (960, 540),
-            pygame.DOUBLEBUF | pygame.OPENGL,
-        )
-        pygame.display.set_caption(
-            "Computacao Grafica - Besouro e Caracol"
-        )
-
-        # Exibe as informações do ambiente gráfico.
-        print("=== INFORMACOES OPENGL ===")
-        print("Fabricante:", informacao_opengl(GL_VENDOR))
-        print("Placa grafica:", informacao_opengl(GL_RENDERER))
-        print("Versao OpenGL:", informacao_opengl(GL_VERSION))
-        print(
-            "Versao GLSL:",
-            informacao_opengl(GL_SHADING_LANGUAGE_VERSION),
-        )
-
+    def initialize(self):
         glEnable(GL_DEPTH_TEST)
+        glViewport(0, 0, 960, 540)
+        glClearColor(0.08, 0.10, 0.16, 1.0)
 
-        relogio = pygame.time.Clock()
-        executando = True
+        root = Path(__file__).resolve().parent
 
-        while executando:
-            for evento in pygame.event.get():
-                if evento.type == pygame.QUIT:
-                    executando = False
+        self.shader = ShaderProgram(
+            root / "shaders" / "basic.vert",
+            root / "shaders" / "basic.frag",
+        )
 
-            # Define a cor de fundo da janela.
-            glClearColor(0.08, 0.10, 0.16, 1.0)
+        self.camera = Camera(
+            position=(0, 1.5, 5),
+            target=(0, 0, 0),
+            aspect_ratio=960 / 540,
+        )
 
-            # Limpa os buffers de cor e profundidade.
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        self.cube = Mesh(create_box_geometry())
 
-            pygame.display.flip()
-            relogio.tick(60)
+        print("Cena tridimensional inicializada com sucesso!")
 
-    finally:
-        pygame.quit()
+    def update(self):
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+        # Rotacao controlada pelo tempo decorrido.
+        angle = self.time * 0.8
+
+        c = math.cos(angle)
+        s = math.sin(angle)
+
+        model = np.array(
+            [
+                [c, 0, s, 0],
+                [0, 1, 0, 0],
+                [-s, 0, c, 0],
+                [0, 0, 0, 1],
+            ],
+            dtype=np.float32,
+        )
+
+        self.shader.use()
+
+        self.shader.set_matrix4("uModel", model)
+        self.shader.set_matrix4(
+            "uView", self.camera.get_view_matrix()
+        )
+        self.shader.set_matrix4(
+            "uProjection",
+            self.camera.get_projection_matrix(),
+        )
+
+        self.cube.draw()
 
 
 if __name__ == "__main__":
-    main()
+    app = BesouroCaracolApp()
+    app.run()
