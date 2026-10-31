@@ -155,32 +155,48 @@ class BesouroMecanico:
                 self.COR_OLHOS,
             )
 
-    def update(self, tempo):
-        """Atualiza os movimentos do besouro."""
+    def update(
+        self,
+        tempo,
+        x,
+        em_movimento,
+        inspecionando=False,
+    ):
+        """Atualiza o besouro conforme a interacao."""
 
-        # Deslocamento e oscilacao do corpo.
-        self.root.set_position(
-            0,
-            math.sin(tempo * 6.0) * 0.02,
-            math.sin(tempo * 0.65) * 0.28,
+        # Movimento vertical somente durante a caminhada.
+        oscilacao = (
+            math.sin(tempo * 6.0) * 0.02
+            if em_movimento else 0.0
+        )
+
+        # Posicao controlada pela sequencia de interacao.
+        self.root.set_position(x, oscilacao, 0)
+
+        # O besouro fica orientado para o caracol.
+        rotacao_inspecao = (
+            math.sin(tempo * 2.0) * 0.06
+            if inspecionando else 0.0
         )
 
         self.root.set_rotation(
             0,
-            math.sin(tempo * 0.5) * 0.15,
+            -math.pi / 2 + rotacao_inspecao,
             0,
         )
 
-        # Movimento alternado das patas.
+        # Patas se movimentam apenas durante a caminhada.
         for pivo, lado, indice in self.patas:
             fase = indice * math.pi
 
             if lado == 1:
                 fase += math.pi
 
-            movimento = math.sin(
-                tempo * 6.0 + fase
-            ) * 0.22
+            amplitude = 0.24 if em_movimento else 0.0
+
+            movimento = (
+                math.sin(tempo * 6.0 + fase) * amplitude
+            )
 
             pivo.set_rotation(
                 0,
@@ -188,11 +204,15 @@ class BesouroMecanico:
                 -lado * 0.04,
             )
 
-        # Oscilacao das antenas.
+        # Antenas se movimentam mais durante a inspecao.
         for pivo, lado in self.antenas:
-            movimento = math.sin(
-                tempo * 3.0 + lado
-            ) * 0.14
+            amplitude = (
+                0.34 if inspecionando else 0.10
+            )
+
+            movimento = (
+                math.sin(tempo * 4.0 + lado) * amplitude
+            )
 
             pivo.set_rotation(
                 0,

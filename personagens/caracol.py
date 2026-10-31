@@ -181,36 +181,56 @@ class CaracolRobotico:
                 rotacao_x=angulo_x,
             )
 
-    def update(self, tempo):
-        """Atualiza o deslizamento e as articulacoes."""
+    
+    def update(
+        self,
+        tempo,
+        x,
+        em_movimento,
+        alerta=False,
+    ):
+        """Atualiza o caracol conforme a interacao."""
 
-        # Deslocamento inicial de demonstracao.
-        # A interacao coordenada sera adicionada depois.
-        self.root.set_position(
-            -2.0,
-            math.sin(tempo * 3.0) * 0.015,
-            math.sin(tempo * 0.6) * 0.15,
+        # Oscilacao suave durante o deslizamento.
+        oscilacao = (
+            math.sin(tempo * 3.0) * 0.015
+            if em_movimento else 0.0
         )
 
-        # Pequena mudanca de orientacao.
+        # Posicao determinada pela interacao.
+        self.root.set_position(
+            x,
+            oscilacao,
+            0,
+        )
+
+        # Caracol orientado para o lado do besouro.
         self.root.set_rotation(
             0,
-            math.sin(tempo * 0.45) * 0.11,
+            math.pi / 2,
             0,
         )
 
-        # Movimento sutil da cabeca.
+        # Cabeca reage quando detecta o besouro.
+        amplitude_cabeca = (
+            0.14 if alerta else 0.06
+        )
+
         self.cabeca_pivo.set_rotation(
-            math.sin(tempo * 1.8) * 0.07,
+            math.sin(tempo * 2.0) * amplitude_cabeca,
             0,
             0,
         )
 
-        # Oscilacao independente das antenas.
+        # Sensores das antenas reagem a aproximacao.
         for pivo, lado in self.antenas:
-            movimento = math.sin(
-                tempo * 2.8 + lado
-            ) * 0.14
+            amplitude = (
+                0.25 if alerta else 0.10
+            )
+
+            movimento = (
+                math.sin(tempo * 3.2 + lado) * amplitude
+            )
 
             pivo.set_rotation(
                 movimento * 0.5,

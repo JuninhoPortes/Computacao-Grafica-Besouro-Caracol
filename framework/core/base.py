@@ -45,6 +45,12 @@ class Base:
         """Implementado pela aplicação para atualizar e renderizar."""
         raise NotImplementedError
 
+    
+    def handle_event(self, event):
+        """Permite tratar eventos especificos da aplicacao."""
+        pass
+
+
     def run(self):
         """Executa o ciclo principal da aplicação."""
         try:
@@ -62,6 +68,9 @@ class Base:
                     elif event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
                             self.running = False
+
+                    # Encaminha o evento para a aplicacao.
+                    self.handle_event(event)
 
                 if not self.running:
                     break

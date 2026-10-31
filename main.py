@@ -1,6 +1,8 @@
 
 from pathlib import Path
 
+import pygame
+
 from OpenGL.GL import (
     GL_DEPTH_TEST,
     glClearColor,
@@ -20,9 +22,11 @@ from framework.geometry.box import create_box_geometry
 from personagens.besouro import BesouroMecanico
 from personagens.caracol import CaracolRobotico
 
+from cena.interacao import ControladorInteracao
+
 
 class BesouroCaracolApp(Base):
-    """Aplicacao principal do projeto."""
+    """Aplicacao principal de Computacao Grafica."""
 
     def initialize(self):
         glEnable(GL_DEPTH_TEST)
@@ -36,7 +40,6 @@ class BesouroCaracolApp(Base):
             root_path / "shaders" / "basic.frag",
         )
 
-        # Camera ajustada para visualizar os dois personagens.
         self.camera = Camera(
             position=(4.1, 3.1, 7.7),
             target=(-0.8, 0.7, 0),
@@ -46,34 +49,70 @@ class BesouroCaracolApp(Base):
         self.scene = Scene()
         self.renderer = Renderer(self.shader)
 
-        # Plataforma do laboratorio de testes.
+        # Plataforma do laboratorio.
         vertices_chao = create_box_geometry(size=1.0)
         vertices_chao[:, 8:11] = (0.22, 0.27, 0.33)
 
         chao = Object3D(Mesh(vertices_chao))
         chao.set_position(0, -0.08, 0)
         chao.set_scale(7.5, 0.16, 5.5)
-
         self.scene.add(chao)
 
-        # Tema 29: Besouro Mecanico.
+        # Personagem 1: Besouro mecanico.
         self.besouro = BesouroMecanico()
         self.scene.add(self.besouro.root)
 
-        # Tema 30: Caracol Robotico.
+        # Personagem 2: Caracol robotico.
         self.caracol = CaracolRobotico()
         self.scene.add(self.caracol.root)
 
-        print("Cena com dois personagens inicializada!")
-        print("Tema 29: Besouro Mecanico")
-        print("Tema 30: Caracol Robotico")
+        # Controlador de interacao.
+        self.interacao = ControladorInteracao()
+        self.ultima_fase = None
+
+        print("Cena tridimensional inicializada!")
+        print("Interacao coordenada habilitada.")
+        print("Pressione R para reiniciar a sequencia.")
+        print("Pressione ESC para sair.")
+
+    def handle_event(self, event):
+        """Processa comandos especificos da aplicacao."""
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                self.interacao = ControladorInteracao()
+                self.ultima_fase = None
+
+                print("Interacao reiniciada!")
 
     def update(self):
-        # Atualiza cada personagem.
-        self.besouro.update(self.time)
-        self.caracol.update(self.time)
+        # Atualiza a maquina de estados.
+        estado = self.interacao.atualizar(
+            self.delta_time
+        )
 
-        # Renderiza a cena completa.
+        # Identifica mudancas de fase.
+        if estado.fase != self.ultima_fase:
+            print(f"Fase atual: {estado.fase}")
+            self.ultima_fase = estado.fase
+
+        # Atualiza o comportamento do besouro.
+        self.besouro.update(
+            self.time,
+            estado.x_besouro,
+            estado.besouro_movendo,
+            estado.inspecionando,
+        )
+
+        # Atualiza o comportamento do caracol.
+        self.caracol.update(
+            self.time,
+            estado.x_caracol,
+            estado.caracol_movendo,
+            estado.caracol_alerta,
+        )
+
+        # Renderiza a cena.
         self.renderer.render(
             self.scene,
             self.camera,
