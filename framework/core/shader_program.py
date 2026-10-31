@@ -8,6 +8,7 @@ from OpenGL.GL import (
     glGetUniformLocation,
     glUniformMatrix4fv,
     glUseProgram,
+    glUniform1i,
 )
 from OpenGL.GL.shaders import compileProgram, compileShader
 
@@ -35,3 +36,18 @@ class ShaderProgram:
 
         # GL_TRUE permite enviar nossa matriz NumPy em ordem de linhas.
         glUniformMatrix4fv(location, 1, GL_TRUE, matrix)
+
+    
+    def set_int(self, name, value):
+        """Envia um inteiro para um uniform do shader."""
+        location = glGetUniformLocation(
+            self.program, name
+        )
+
+        if location == -1:
+            raise ValueError(
+                f"Uniform nao encontrado: {name}"
+            )
+
+        glUniform1i(location, int(value))
+

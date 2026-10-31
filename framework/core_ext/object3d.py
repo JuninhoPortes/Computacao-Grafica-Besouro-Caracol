@@ -8,6 +8,7 @@ class Object3D:
 
     def __init__(self, mesh=None):
         self.mesh = mesh
+        self.texture = None
         self.parent = None
         self.children = []
 

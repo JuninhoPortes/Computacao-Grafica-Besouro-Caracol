@@ -2,10 +2,21 @@
 #version 330 core
 
 in vec3 vColor;
+in vec2 vUV;
+
+uniform sampler2D uTexture;
+uniform int uUseTexture;
 
 out vec4 FragColor;
 
 void main()
 {
-    FragColor = vec4(vColor, 1.0);
+    vec3 surfaceColor = vColor;
+
+    if (uUseTexture == 1)
+    {
+        surfaceColor = texture(uTexture, vUV).rgb;
+    }
+
+    FragColor = vec4(surfaceColor, 1.0);
 }

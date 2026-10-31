@@ -24,6 +24,7 @@ from personagens.caracol import CaracolRobotico
 
 from cena.interacao import ControladorInteracao
 from cena.controle_camera import ControleCamera
+from framework.core_ext.texture import Texture
 
 
 class BesouroCaracolApp(Base):
@@ -62,11 +63,20 @@ class BesouroCaracolApp(Base):
         vertices_chao = create_box_geometry(size=1.0)
         vertices_chao[:, 8:11] = (0.22, 0.27, 0.33)
 
+        
         chao = Object3D(Mesh(vertices_chao))
         chao.set_position(0, -0.08, 0)
         chao.set_scale(7.5, 0.16, 5.5)
 
+        # Aplica uma imagem PNG como textura do piso.
+        chao.texture = Texture(
+            root_path
+            / "texturas"
+            / "piso_laboratorio.png"
+        )
+
         self.scene.add(chao)
+
 
         # Personagem 1: Besouro mecanico.
         self.besouro = BesouroMecanico()
