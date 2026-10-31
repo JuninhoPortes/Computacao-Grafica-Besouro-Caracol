@@ -7,28 +7,41 @@ from OpenGL.GL import (
     glActiveTexture,
     glBindTexture,
     glClear,
+    glViewport,
 )
-
-from framework.light.directional import DirectionalLight
-from framework.material.surface import SurfaceMaterial
 
 
 class Renderer:
-    """Renderiza objetos com materiais e luz direcional."""
+    """Renderiza a cena com iluminacao e shadow mapping."""
 
-    def __init__(self, shader, light=None):
+    def __init__(
+        self,
+        shader,
+        light,
+        shadow_map,
+        screen_size=(960, 540),
+    ):
         self.shader = shader
+        self.light = light
+        self.shadow_map = shadow_map
+        self.screen_size = screen_size
 
-        self.light = (
-            light if light is not None
-            else DirectionalLight()
-        )
+        from framework.material.surface import SurfaceMaterial
 
-        # Material utilizado quando o objeto nao possui um proprio.
         self.default_material = SurfaceMaterial()
 
     def render(self, scene, camera):
-        # Limpa os buffers da janela.
+        # PASSAGEM 1: gera a textura de profundidade.
+        self.shadow_map.render_depth(scene)
+
+        # PASSAGEM 2: renderiza a cena normalmente.
+        glViewport(
+            0,
+            0,
+            self.screen_size[0],
+            self.screen_size[1],
+        )
+
         glClear(
             GL_COLOR_BUFFER_BIT |
             GL_DEPTH_BUFFER_BIT
@@ -36,7 +49,7 @@ class Renderer:
 
         self.shader.use()
 
-        # Matrizes da camera.
+        # Matrizes da camera principal.
         self.shader.set_matrix4(
             "uView",
             camera.get_view_matrix(),
@@ -47,13 +60,12 @@ class Renderer:
             camera.get_projection_matrix(),
         )
 
-        # Posicao da camera para reflexao especular.
         self.shader.set_vec3(
             "uCameraPosition",
             camera.position,
         )
 
-        # Configura a iluminacao direcional.
+        # Iluminacao direcional.
         self.shader.set_vec3(
             "uLightDirection",
             self.light.direction,
@@ -64,29 +76,37 @@ class Renderer:
             self.light.color,
         )
 
-        # Unidade de textura utilizada.
+        # Matriz de visualizacao da luz.
+        self.shader.set_matrix4(
+            "uLightViewProjection",
+            self.shadow_map.light_view_projection,
+        )
+
+        # Unidade 0: textura da superficie.
+        # Unidade 1: mapa de profundidade.
         self.shader.set_int("uTexture", 0)
+        self.shader.set_int("uShadowMap", 1)
+
+        self.shadow_map.bind(1)
+
         glActiveTexture(GL_TEXTURE0)
 
-        # Renderiza os objetos da cena.
         for obj in scene.traverse():
             if obj.mesh is None:
                 continue
 
-            # Matriz global do objeto.
             self.shader.set_matrix4(
                 "uModel",
                 obj.get_world_matrix(),
             )
 
-            # Seleciona o material da superficie.
+            # Material do objeto.
             material = (
                 obj.material
                 if obj.material is not None
                 else self.default_material
             )
 
-            # Envia as propriedades do material.
             self.shader.set_float(
                 "uMaterialAmbient",
                 material.ambient,
@@ -107,7 +127,9 @@ class Renderer:
                 material.shininess,
             )
 
-            # Verifica se o objeto possui textura.
+            # Textura comum, quando existente.
+            glActiveTexture(GL_TEXTURE0)
+
             if obj.texture is not None:
                 obj.texture.bind(0)
 
@@ -121,8 +143,13 @@ class Renderer:
                     "uUseTexture", 0
                 )
 
-            # Desenha a geometria.
             obj.mesh.draw()
 
+        # Limpa os bindings de textura utilizados.
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, 0)
+
+        glActiveTexture(GL_TEXTURE0 + 1)
+        glBindTexture(GL_TEXTURE_2D, 0)
+
+        glActiveTexture(GL_TEXTURE0)

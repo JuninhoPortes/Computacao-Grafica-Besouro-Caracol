@@ -27,6 +27,7 @@ from cena.controle_camera import ControleCamera
 from framework.core_ext.texture import Texture
 from framework.light.directional import DirectionalLight
 from framework.material.surface import SurfaceMaterial
+from framework.core_ext.shadow_map import ShadowMap
 
 
 class BesouroCaracolApp(Base):
@@ -67,11 +68,23 @@ class BesouroCaracolApp(Base):
             color=(1.0, 0.97, 0.90),
         )
 
-        # Renderizador com iluminacao.
+        
+        # Shadow mapping com mapa de profundidade.
+        self.shadow_map = ShadowMap(
+            root_path / "shaders" / "shadow_depth.vert",
+            root_path / "shaders" / "shadow_depth.frag",
+            light_direction=self.luz.direction,
+            resolution=2048,
+        )
+
+        # Renderizador com iluminacao e sombras dinamicas.
         self.renderer = Renderer(
             self.shader,
             self.luz,
+            self.shadow_map,
+            screen_size=(960, 540),
         )
+
 
 
         # Plataforma do laboratorio.
