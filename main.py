@@ -23,6 +23,7 @@ from personagens.besouro import BesouroMecanico
 from personagens.caracol import CaracolRobotico
 
 from cena.interacao import ControladorInteracao
+from cena.controle_camera import ControleCamera
 
 
 class BesouroCaracolApp(Base):
@@ -35,17 +36,25 @@ class BesouroCaracolApp(Base):
 
         root_path = Path(__file__).resolve().parent
 
+        # Shaders.
         self.shader = ShaderProgram(
             root_path / "shaders" / "basic.vert",
             root_path / "shaders" / "basic.frag",
         )
 
+        # Camera em perspectiva.
         self.camera = Camera(
             position=(4.1, 3.1, 7.7),
             target=(-0.8, 0.7, 0),
             aspect_ratio=960 / 540,
         )
 
+        # Controle de camera pelo teclado.
+        self.controle_camera = ControleCamera(
+            self.camera
+        )
+
+        # Cena e renderizador.
         self.scene = Scene()
         self.renderer = Renderer(self.shader)
 
@@ -56,6 +65,7 @@ class BesouroCaracolApp(Base):
         chao = Object3D(Mesh(vertices_chao))
         chao.set_position(0, -0.08, 0)
         chao.set_scale(7.5, 0.16, 5.5)
+
         self.scene.add(chao)
 
         # Personagem 1: Besouro mecanico.
@@ -66,53 +76,96 @@ class BesouroCaracolApp(Base):
         self.caracol = CaracolRobotico()
         self.scene.add(self.caracol.root)
 
-        # Controlador de interacao.
+        # Controlador da interacao.
         self.interacao = ControladorInteracao()
+
         self.ultima_fase = None
+
+        # Controle independente do tempo de animacao.
+        self.tempo_animacao = 0.0
+
+        # Estado da pausa.
+        self.pausado = False
 
         print("Cena tridimensional inicializada!")
         print("Interacao coordenada habilitada.")
-        print("Pressione R para reiniciar a sequencia.")
-        print("Pressione ESC para sair.")
+
+        print("\n=== CONTROLES ===")
+        print("A / D: Girar camera")
+        print("W / S: Aproximar / afastar camera")
+        print("Q / E: Baixar / elevar camera")
+        print("ESPACO ou P: Pausar / retomar")
+        print("R: Reiniciar animacao")
+        print("ESC: Sair")
 
     def handle_event(self, event):
-        """Processa comandos especificos da aplicacao."""
+        """Processa os comandos da aplicacao."""
 
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r:
-                self.interacao = ControladorInteracao()
-                self.ultima_fase = None
+        if event.type != pygame.KEYDOWN:
+            return
 
-                print("Interacao reiniciada!")
+        # Pausa ou retoma a animacao.
+        if event.key in (
+            pygame.K_SPACE,
+            pygame.K_p,
+        ):
+            self.pausado = not self.pausado
+
+            if self.pausado:
+                print("Animacao pausada.")
+            else:
+                print("Animacao retomada.")
+
+        # Reinicia toda a sequencia.
+        elif event.key == pygame.K_r:
+            self.interacao = ControladorInteracao()
+
+            self.tempo_animacao = 0.0
+            self.ultima_fase = None
+            self.pausado = False
+
+            print("Interacao reiniciada!")
 
     def update(self):
-        # Atualiza a maquina de estados.
-        estado = self.interacao.atualizar(
+        # A camera continua funcionando mesmo pausada.
+        self.controle_camera.atualizar(
             self.delta_time
         )
 
-        # Identifica mudancas de fase.
+        # A animacao so avanca quando nao esta pausada.
+        if not self.pausado:
+            self.tempo_animacao += self.delta_time
+            delta_animacao = self.delta_time
+        else:
+            delta_animacao = 0.0
+
+        # Atualiza a maquina de estados.
+        estado = self.interacao.atualizar(
+            delta_animacao
+        )
+
+        # Exibe mudancas de fase.
         if estado.fase != self.ultima_fase:
             print(f"Fase atual: {estado.fase}")
             self.ultima_fase = estado.fase
 
-        # Atualiza o comportamento do besouro.
+        # Atualiza o besouro.
         self.besouro.update(
-            self.time,
+            self.tempo_animacao,
             estado.x_besouro,
             estado.besouro_movendo,
             estado.inspecionando,
         )
 
-        # Atualiza o comportamento do caracol.
+        # Atualiza o caracol.
         self.caracol.update(
-            self.time,
+            self.tempo_animacao,
             estado.x_caracol,
             estado.caracol_movendo,
             estado.caracol_alerta,
         )
 
-        # Renderiza a cena.
+        # A renderizacao permanece ativa mesmo pausada.
         self.renderer.render(
             self.scene,
             self.camera,
