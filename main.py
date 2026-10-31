@@ -133,6 +133,7 @@ class BesouroCaracolApp(Base):
 
         # Estado da pausa.
         self.pausado = False
+        self.atualizar_titulo()
 
         print("Cena tridimensional inicializada!")
         print("Interacao coordenada habilitada.")
@@ -143,10 +144,13 @@ class BesouroCaracolApp(Base):
         print("Q / E: Baixar / elevar camera")
         print("ESPACO ou P: Pausar / retomar")
         print("R: Reiniciar animacao")
+        print("C: Restaurar camera inicial")
         print("ESC: Sair")
+        
 
+    
     def handle_event(self, event):
-        """Processa os comandos da aplicacao."""
+        """Processa comandos da aplicacao."""
 
         if event.type != pygame.KEYDOWN:
             return
@@ -163,7 +167,9 @@ class BesouroCaracolApp(Base):
             else:
                 print("Animacao retomada.")
 
-        # Reinicia toda a sequencia.
+            self.atualizar_titulo()
+
+        # Reinicia a interacao.
         elif event.key == pygame.K_r:
             self.interacao = ControladorInteracao()
 
@@ -171,7 +177,22 @@ class BesouroCaracolApp(Base):
             self.ultima_fase = None
             self.pausado = False
 
+            self.atualizar_titulo()
+
             print("Interacao reiniciada!")
+
+        # Restaura o enquadramento inicial.
+        elif event.key == pygame.K_c:
+            self.camera.position[:] = (
+                4.1, 3.1, 7.7
+            )
+
+            self.controle_camera = ControleCamera(
+                self.camera
+            )
+
+            print("Camera restaurada!")
+
 
     def update(self):
         # A camera continua funcionando mesmo pausada.
@@ -194,7 +215,12 @@ class BesouroCaracolApp(Base):
         # Exibe mudancas de fase.
         if estado.fase != self.ultima_fase:
             print(f"Fase atual: {estado.fase}")
+
             self.ultima_fase = estado.fase
+
+            # Atualiza a informacao exibida na janela.
+            self.atualizar_titulo()
+
 
         # Atualiza o besouro.
         self.besouro.update(
@@ -217,6 +243,23 @@ class BesouroCaracolApp(Base):
             self.scene,
             self.camera,
         )
+    
+    def atualizar_titulo(self):
+        """Atualiza a fase e o estado na barra de titulo."""
+
+        fase = self.ultima_fase or "Exploracao"
+
+        if self.pausado:
+            status = "PAUSADO"
+        elif fase == "Concluida":
+            status = "FINALIZADO"
+        else:
+            status = "ATIVO"
+
+        pygame.display.set_caption(
+            f"Besouro e Caracol | {fase} | {status}"
+        )
+
 
 
 if __name__ == "__main__":
