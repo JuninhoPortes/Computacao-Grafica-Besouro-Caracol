@@ -25,6 +25,8 @@ from personagens.caracol import CaracolRobotico
 from cena.interacao import ControladorInteracao
 from cena.controle_camera import ControleCamera
 from framework.core_ext.texture import Texture
+from framework.light.directional import DirectionalLight
+from framework.material.surface import SurfaceMaterial
 
 
 class BesouroCaracolApp(Base):
@@ -56,8 +58,21 @@ class BesouroCaracolApp(Base):
         )
 
         # Cena e renderizador.
+        
         self.scene = Scene()
-        self.renderer = Renderer(self.shader)
+
+        # Fonte de luz direcional do laboratorio.
+        self.luz = DirectionalLight(
+            direction=(0.7, 1.0, 0.6),
+            color=(1.0, 0.97, 0.90),
+        )
+
+        # Renderizador com iluminacao.
+        self.renderer = Renderer(
+            self.shader,
+            self.luz,
+        )
+
 
         # Plataforma do laboratorio.
         vertices_chao = create_box_geometry(size=1.0)
@@ -67,6 +82,15 @@ class BesouroCaracolApp(Base):
         chao = Object3D(Mesh(vertices_chao))
         chao.set_position(0, -0.08, 0)
         chao.set_scale(7.5, 0.16, 5.5)
+        
+        # Material metalico predominantemente fosco.
+        chao.material = SurfaceMaterial(
+            ambient=0.40,
+            diffuse=0.55,
+            specular=0.04,
+            shininess=8.0,
+        )
+
 
         # Aplica uma imagem PNG como textura do piso.
         chao.texture = Texture(

@@ -9,6 +9,8 @@ from OpenGL.GL import (
     glUniformMatrix4fv,
     glUseProgram,
     glUniform1i,
+    glUniform1f,
+    glUniform3f,
 )
 from OpenGL.GL.shaders import compileProgram, compileShader
 
@@ -50,4 +52,37 @@ class ShaderProgram:
             )
 
         glUniform1i(location, int(value))
+
+    
+    def set_float(self, name, value):
+        """Envia um numero real para um uniform."""
+        location = glGetUniformLocation(
+            self.program, name
+        )
+
+        if location == -1:
+            raise ValueError(
+                f"Uniform nao encontrado: {name}"
+            )
+
+        glUniform1f(location, float(value))
+
+    def set_vec3(self, name, values):
+        """Envia um vetor de tres componentes ao shader."""
+        location = glGetUniformLocation(
+            self.program, name
+        )
+
+        if location == -1:
+            raise ValueError(
+                f"Uniform nao encontrado: {name}"
+            )
+
+        glUniform3f(
+            location,
+            float(values[0]),
+            float(values[1]),
+            float(values[2]),
+        )
+
 
