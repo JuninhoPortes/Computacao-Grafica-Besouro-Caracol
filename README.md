@@ -2,14 +2,12 @@
 
 **Trabalho Prático de Computação Gráfica — Ciência da Computação — 2026/02**
 
-> **Antes da entrega:** substituir os campos de identificação dos integrantes abaixo. Este README descreve a implementação verificada no projeto e as validações locais relatadas pelos desenvolvedores.
-
 ## Integrantes e temas
 
 | Integrante | Identificação | Tema |
 | --- | --- | --- |
-| 1 | **[NOME COMPLETO / MATRÍCULA]** | **29 — Besouro mecânico** |
-| 2 | **[NOME COMPLETO / MATRÍCULA]** | **30 — Caracol robótico** |
+| 1 | **[ANA BEATRIZ VIGIANE MAIA / 231-002727]** | **29 — Besouro mecânico** |
+| 2 | **[EVANDRO PORTES DA SILVA JÚNIOR / 231-000654]** | **30 — Caracol robótico** |
 
 ## Objetivo e descrição da cena
 
@@ -173,15 +171,15 @@ A textura pode ser regenerada, caso necessário, com:
 
 ## Contribuições individuais
 
-**Integrante 1 — [NOME]:** implementação do código Python, modelagem e animação dos dois personagens, sistema de interação, framework adaptado, recursos de renderização, testes, organização do repositório e documentação técnica, com apoio de IA quando indicado abaixo.
+**Integrante 1 — EVANDRO PORTES DA SILVA JÚNIOR:** implementação do código Python, modelagem e animação dos dois personagens, sistema de interação, framework adaptado, recursos de renderização, testes, organização do repositório e documentação técnica, com apoio de IA quando indicado abaixo.
 
-**Integrante 2 — [NOME]:** elaboração da apresentação em PowerPoint a partir do projeto concluído, preparação dos slides e participação na exposição oral. **Revisar esta descrição antes da entrega** para refletir as atividades efetivamente realizadas.
+**Integrante 2 — ANA BEATRIZ VIGIANE MAIA:** elaboração da apresentação em PowerPoint a partir do projeto concluído, preparação dos slides e participação na exposição oral.
 
 Ambos os integrantes deverão estudar e explicar a aplicação integrada durante a apresentação individual avaliada pelo professor.
 
 ## Declaração de uso de inteligência artificial
 
-Foi utilizada a ferramenta **ChatGPT (OpenAI)** como apoio ao planejamento, estruturação das etapas, elaboração inicial e revisão de códigos Python e GLSL, definição da interação, elaboração de testes e preparação da documentação. O apoio incidiu, de maneira ampla, sobre os módulos `main.py`, `cena/`, `personagens/`, `framework/`, `shaders/`, scripts de geração de textura e testes automatizados. O código foi integrado, executado e validado localmente durante o desenvolvimento. **Conferir e complementar esta declaração** com quaisquer outras ferramentas utilizadas ou modificações relevantes antes da entrega.
+Foi utilizada a ferramenta **ChatGPT (OpenAI)** como apoio ao planejamento, estruturação das etapas, elaboração inicial e revisão de códigos Python e GLSL, definição da interação, elaboração de testes e preparação da documentação. O apoio incidiu, de maneira ampla, sobre os módulos `main.py`, `cena/`, `personagens/`, `framework/`, `shaders/`, scripts de geração de textura e testes automatizados. O código foi integrado, executado e validado localmente durante o desenvolvimento. Também foram utilizadas ferramentas de inteligência artificial como apoio à organização e elaboração da apresentação acadêmica, a partir da documentação técnica e dos resultados reais da aplicação.
 
 A utilização de IA não substitui a compreensão técnica, a verificação do código nem a capacidade de explicar seu funcionamento.
 
@@ -198,4 +196,3 @@ A textura `piso_laboratorio.png` é produzida localmente pelo script `ferramenta
 - Incluir o código Python, os quatro shaders, a textura PNG, o framework adaptado, o `requirements.txt`, os testes e este README.
 - Não incluir a pasta `.venv`, caches de Python nem o diretório `.git` no ZIP de entrega.
 - Anexar a documentação técnica em PDF e a apresentação da dupla conforme o planejamento de entrega.
-- Antes do envio, preencher os campos dos integrantes e confirmar que as informações de contribuição e uso de IA correspondem ao trabalho efetivamente realizado.
