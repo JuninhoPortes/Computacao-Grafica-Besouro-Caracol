@@ -6,8 +6,8 @@
 
 | Integrante | Identificação | Tema |
 | --- | --- | --- |
-| 1 | **[ANA BEATRIZ VIGIANE MAIA / 231-002727]** | **29 — Besouro mecânico** |
-| 2 | **[EVANDRO PORTES DA SILVA JÚNIOR / 231-000654]** | **30 — Caracol robótico** |
+| 1 | **EVANDRO PORTES DA SILVA JÚNIOR / 231-000654** | **29 — Besouro mecânico** |
+| 2 | **ANA BEATRIZ VIGIANE MAIA / 231-002727** | **30 — Caracol robótico** |
 
 ## Objetivo e descrição da cena
 
